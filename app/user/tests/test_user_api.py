@@ -10,6 +10,7 @@ from rest_framework import status
 
 CREATE_USER_URL = reverse('user:create')
 TOKEN_URL = reverse('user:token')
+ACCESS_TOKEN_URL = reverse('user:token_refresh')
 USER_URL = reverse('user:user_detail')
 
 
@@ -100,6 +101,21 @@ class PublicUserApiTests(TestCase):
 
         self.assertIn('name', decodedPayload)
         self.assertIn('email', decodedPayload)
+
+    def test_refresh_token_endpoint(self):
+        """Test that refresh token results in new access token"""
+        payload = {
+            'email': 'testuser@email.com',
+            'password': 'testpass',
+            'name': 'Testosterone'
+        }
+        create_user(**payload)
+        tokens = self.client.post(TOKEN_URL, payload)
+        refresh_token = tokens.data['refresh']
+        res = self.client.post(ACCESS_TOKEN_URL, {'refresh': refresh_token})
+
+        self.assertIn('access', res.data)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
 
     def test_retrieve_user_fail_if_anauthorized(self):
         """Test that authentication is required for users"""
