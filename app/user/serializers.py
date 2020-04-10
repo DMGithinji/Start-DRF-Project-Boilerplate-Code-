@@ -22,4 +22,8 @@ class AuthTokenPairSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
 
+        # Adding custom fields
+        token['name'] = user.name
+        token['email'] = user.email
+
         return token

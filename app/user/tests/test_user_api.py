@@ -1,3 +1,5 @@
+import jwt
+
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.urls import reverse
@@ -83,3 +85,17 @@ class PublicUserApiTests(TestCase):
         self.assertNotIn('access', res.data)
         self.assertNotIn('refresh', res.data)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_custom_fields_in_jwt(self):
+        """Test that JWT access token contains added custom fields"""
+        payload = {
+            'email': 'testuser@email.com',
+            'password': 'testpass',
+            'name': 'Testosterone'
+        }
+        create_user(**payload)
+        res = self.client.post(TOKEN_URL, payload)
+        decodedPayload = jwt.decode(res.data['access'], None, None)
+
+        self.assertIn('name', decodedPayload)
+        self.assertIn('email', decodedPayload)
