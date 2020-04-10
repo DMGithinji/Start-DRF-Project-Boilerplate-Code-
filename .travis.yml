@@ -12,7 +12,7 @@ before_script: pip install docker-compose
 
 script:
   - docker-compose run app sh -c "python manage.py test && flake8"
-  - docker-compose run app sh -c "coverage run manage.py test"
+  - docker-compose run app sh -c "coverage run --source=app manage.py test"
 
 after_success:
   - coveralls
